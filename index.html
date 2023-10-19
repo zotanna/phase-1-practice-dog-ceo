@@ -22,8 +22,85 @@
     </select>
 
     <ul id="dog-breeds">
-
+      <!-- breeds here -->
     </ul>
 
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const imgUrl = "https://dog.ceo/api/breeds/image/random/4";
+        const breedUrl = 'https://dog.ceo/api/breeds/list/all';
+        const dogImageContainer = document.getElementById("dog-image-container");
+        const breedDropdown = document.getElementById("breed-dropdown");
+        const dogBreedsList = document.getElementById("dog-breeds");
+
+        function changeFontColor(event) {
+          const selectedBreed = event.target;
+          selectedBreed.style.color = "grey"; 
+
+          const allBreeds = dogBreedsList.getElementsByTagName("li");
+          for (const breed of allBreeds) {
+            if (breed !== selectedBreed) {
+              breed.style.color = ""; 
+            }
+          }
+        }
+
+        function filterBreeds(letter) {
+          const allBreeds = dogBreedsList.getElementsByTagName("li");
+          for (const breed of allBreeds) {
+            const breedName = breed.textContent.toLowerCase();
+            if (breedName.startsWith(letter)) {
+              breed.style.display = "block"; 
+            } else {
+              breed.style.display = "none"; 
+            }
+          }
+        }
+
+        fetch(breedUrl)
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === "success") {
+              const breeds = Object.keys(data.message);
+
+              breeds.forEach(breed => {
+                const breedItem = document.createElement("li");
+                breedItem.textContent = breed;
+                dogBreedsList.appendChild(breedItem);
+                breedItem.addEventListener("click", changeFontColor);
+              });
+
+              breedDropdown.addEventListener("change", function () {
+                const selectedLetter = breedDropdown.value;
+                filterBreeds(selectedLetter);
+              });
+            } else {
+              dogBreedsList.innerHTML = "Failed to fetch dog breeds.";
+            }
+          })
+          .catch(error => {
+            dogBreedsList.innerHTML = "An error occurred while fetching dog breeds.";
+            console.error(error);
+          });
+
+        fetch(imgUrl)
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === "success") {
+              data.message.forEach(imgSrc => {
+                const img = document.createElement("img");
+                img.src = imgSrc;
+                dogImageContainer.appendChild(img);
+              });
+            } else {
+              dogImageContainer.innerHTML = "Failed to fetch dog images.";
+            }
+          })
+          .catch(error => {
+            dogImageContainer.innerHTML = "An error occurred while fetching dog images.";
+            console.error(error);
+          });
+      });
+    </script>
   </body>
 </html>
